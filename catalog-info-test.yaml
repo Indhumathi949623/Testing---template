@@ -1,0 +1,213 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: SeatAvailability
+  description: Microservice for SeatAvailability
+  appid: theaterbooking
+  tags:
+    - java
+    - springboot
+  annotations:
+    github.com/project-slug: TheCognizantFoundry/SeatAvailability
+    backstage.io/techdocs-ref: dir:.
+    dev.azure.com/project-repo: SeatAvailability/SeatAvailability
+    jira-project-key: UPSHIFT
+    dev.azure.com/project: SeatAvailability
+    flowsource/datadog-tags-env: engg
+spec:
+  providesApis:
+    - SeatAvailability
+  consumesApis:
+    - ShowInformation
+  type: service
+  system: TheaterBooking
+  lifecycle: production
+  owner: user:guest
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: SeatAvailability
+  description: Get seat availability details
+  tags:
+    - java
+    - springboot
+spec:
+  type: openapi
+  lifecycle: production
+  owner: user:guest
+  system: TheaterBooking
+  definition: |
+    openapi: 3.0.1
+    info:
+      title: OpenAPI definition
+      version: v0
+    servers:
+      - url: http://localhost:9003
+        description: Generated server url
+    paths:
+      /seat-availability/{seatAvailabilityId}:
+        get:
+          tags:
+            - seat-availability-controller
+          operationId: createSeatAvailability
+          parameters:
+            - name: seatAvailabilityId
+              in: path
+              required: true
+              schema:
+                type: integer
+                format: int64
+          responses:
+            '200':
+              description: OK
+              content:
+                '*/*':
+                  schema:
+                    $ref: '#/components/schemas/SeatAvailability'
+        put:
+          tags:
+            - seat-availability-controller
+          operationId: updateSeatAvailability
+          parameters:
+            - name: seatAvailabilityId
+              in: path
+              required: true
+              schema:
+                type: integer
+                format: int64
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/SeatAvailability'
+            required: true
+          responses:
+            '200':
+              description: OK
+              content:
+                '*/*':
+                  schema:
+                    $ref: '#/components/schemas/SeatAvailability'
+        delete:
+          tags:
+            - seat-availability-controller
+          operationId: deleteSeatAvailability
+          parameters:
+            - name: seatAvailabilityId
+              in: path
+              required: true
+              schema:
+                type: integer
+                format: int64
+          responses:
+            '200':
+              description: OK
+      /seats:
+        post:
+          tags:
+            - seats-controller
+          operationId: bookSeatsForShow
+          parameters:
+            - name: showId
+              in: query
+              required: true
+              schema:
+                type: integer
+                format: int64
+            - name: date
+              in: query
+              required: true
+              schema:
+                type: string
+                format: date-time
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: integer
+                    format: int32
+            required: true
+          responses:
+            '200':
+              description: OK
+              content:
+                '*/*':
+                  schema:
+                    $ref: '#/components/schemas/SeatAvailability'
+      /seat-availability:
+        get:
+          tags:
+            - seat-availability-controller
+          operationId: getAvailableSeats
+          parameters:
+            - name: showId
+              in: query
+              required: true
+              schema:
+                type: integer
+                format: int64
+            - name: date
+              in: query
+              required: true
+              schema:
+                type: string
+                format: date-time
+          responses:
+            '200':
+              description: OK
+              content:
+                '*/*':
+                  schema:
+                    uniqueItems: true
+                    type: array
+                    items:
+                      type: integer
+                      format: int32
+        post:
+          tags:
+            - seat-availability-controller
+          operationId: initializeSeatsForShow
+          parameters:
+            - name: showId
+              in: query
+              required: true
+              schema:
+                type: integer
+                format: int64
+            - name: date
+              in: query
+              required: true
+              schema:
+                type: string
+                format: date-time
+          responses:
+            '200':
+              description: OK
+              content:
+                '*/*':
+                  schema:
+                    $ref: '#/components/schemas/SeatAvailability'
+    components:
+      schemas:
+        SeatAvailability:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            date:
+              type: string
+              format: date-time
+            availableSeats:
+              uniqueItems: true
+              type: array
+              items:
+                type: integer
+                format: int32
+            show:
+              type: integer
+              format: int64
